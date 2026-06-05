@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café de Olla — Punto de Venta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cafe: #7a1f08;
+    --cafe-light: #f5ede8;
+    --cafe-mid: #c0431c;
+    --gold: #b8860b;
+    --gold-light: #fdf6e3;
+    --green: #1D9E75;
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --text: #1a1209;
+    --muted: #7a6a5a;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(122,31,8,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    background: var(--cafe);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; letter-spacing: 0.3px; }
+  .logo span { font-size: 13px; display: block; font-family: 'DM Sans', sans-serif; font-weight: 400; opacity: 0.75; margin-top: 1px; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .status-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 4px 12px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .clock { font-size: 13px; opacity: 0.8; font-variant-numeric: tabular-nums; }
+
+  /* LAYOUT */
+  .app { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 58px); overflow: hidden; }
+
+  /* MENU PANEL */
+  .menu-panel { overflow-y: auto; padding: 20px; background: var(--bg); }
+  .cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 10; border-bottom: 1px solid var(--border); }
+  .cat-btn {
+    padding: 6px 16px; border-radius: 20px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 13px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.18s; font-weight: 500;
+  }
+  .cat-btn:hover { border-color: var(--cafe-mid); color: var(--cafe); }
+  .cat-btn.active { background: var(--cafe); color: #fff; border-color: var(--cafe); }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--cafe); margin-bottom: 14px; }
+  .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 12px; }
+  .item-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px; cursor: pointer;
+    transition: all 0.18s; box-shadow: var(--shadow);
+  }
+  .item-card:hover { border-color: var(--cafe-mid); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(122,31,8,0.13); }
+  .item-card:active { transform: scale(0.97); }
+  .item-emoji { font-size: 26px; margin-bottom: 8px; display: block; }
+  .item-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
+  .item-price { font-size: 14px; color: var(--cafe); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .item-rating { font-size: 11px; color: var(--gold); margin-top: 3px; }
+  .item-desc { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .promo-tag { display: inline-block; background: var(--gold-light); color: var(--gold); font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; margin-top: 5px; }
+
+  /* ORDER PANEL */
+  .order-panel {
+    background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,0.04);
+  }
+  .order-top { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+  .order-top h3 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); margin-bottom: 10px; }
+  .table-row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .table-btn {
+    padding: 4px 11px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); font-size: 11px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; color: var(--muted); transition: all 0.15s;
+  }
+  .table-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .table-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); font-weight: 500; }
+
+  /* Notes input */
+  .notes-area { padding: 10px 18px; border-bottom: 1px solid var(--border); }
+  .notes-area textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    color: var(--text); resize: none; background: var(--bg); min-height: 48px;
+  }
+  .notes-area textarea:focus { outline: none; border-color: var(--cafe-mid); }
+  .notes-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: block; }
+
+  /* Order items list */
+  .order-items { flex: 1; overflow-y: auto; padding: 8px 18px; }
+  .order-empty { text-align: center; padding: 30px 10px; color: var(--muted); }
+  .order-empty .big-emoji { font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.5; }
+  .order-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .oi-info { flex: 1; min-width: 0; }
+  .oi-name { font-size: 12px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .oi-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 5px; }
+  .qty-btn {
+    width: 23px; height: 23px; border-radius: 50%; border: 1.5px solid var(--border);
+    background: var(--bg); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; color: var(--text);
+    transition: all 0.15s; line-height: 1;
+  }
+  .qty-btn:hover { border-color: var(--cafe); color: var(--cafe); background: var(--cafe-light); }
+  .qty-num { font-size: 13px; font-weight: 500; min-width: 16px; text-align: center; }
+  .oi-total { font-size: 13px; font-weight: 500; color: var(--cafe); min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Footer totals */
+  .order-footer { padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface); }
+  .totals { margin-bottom: 12px; }
+  .t-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); padding: 3px 0; }
+  .t-row.grand { font-size: 17px; font-weight: 500; color: var(--text); font-family: 'Playfair Display', serif; border-top: 1px solid var(--border); padding-top: 9px; margin-top: 5px; }
+  .action-row { display: flex; gap: 8px; }
+  .btn-clear {
+    flex: 1; padding: 10px; border-radius: var(--radius);
+    border: 1.5px solid var(--border); background: var(--bg);
+    color: var(--muted); font-size: 13px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .btn-clear:hover { border-color: #e74c3c; color: #e74c3c; background: #fef2f2; }
+  .btn-cobrar {
+    flex: 2.5; padding: 10px; border-radius: var(--radius);
+    border: none; background: var(--cafe); color: #fff;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn-cobrar:hover:not(:disabled) { background: var(--cafe-mid); }
+  .btn-cobrar:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-ticket {
+    width: 42px; height: 42px; border-radius: var(--radius);
+    border: 1.5px solid var(--border); background: var(--bg);
+    color: var(--muted); cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .btn-ticket:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* TICKET MODAL */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .ticket {
+    background: #fff; border-radius: 16px; padding: 28px 24px;
+    width: 100%; max-width: 340px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .ticket-header { text-align: center; margin-bottom: 16px; border-bottom: 1px dashed #ddd; padding-bottom: 14px; }
+  .ticket-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--cafe); font-weight: 600; }
+  .ticket-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ticket-meta { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .ticket-items { margin: 12px 0; }
+  .ti-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .ticket-totals { border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px; }
+  .tt-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); padding: 2px 0; }
+  .tt-row.grand { font-size: 16px; color: var(--text); font-weight: 500; padding-top: 7px; border-top: 1px solid #ddd; margin-top: 4px; }
+  .ticket-footer { text-align: center; margin-top: 14px; font-size: 11px; color: var(--muted); }
+  .ticket-footer strong { display: block; font-size: 13px; color: var(--cafe); margin-bottom: 3px; }
+  .ticket-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .ta-btn { flex: 1; padding: 9px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  .ta-btn.primary { background: var(--cafe); color: #fff; border-color: var(--cafe); font-weight: 500; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text); color: #fff; padding: 9px 18px;
+    border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.25s;
+    pointer-events: none; z-index: 300; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* PRINT */
+  @media print {
+    .app, header, .modal-bg { display: none !important; }
+    .print-ticket { display: block !important; }
+  }
+  .print-ticket { display: none; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+
+  @media (max-width: 700px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .order-panel { max-height: 45vh; }
+    .menu-panel { height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">☕ Café de Olla<span>Valle de Guatimapé 402 · Durango · 8:30–14:00 h</span></div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge"><span class="status-dot"></span> Abierto</div>
+    <div class="clock" id="clock"></div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- MENU -->
+  <div class="menu-panel">
+    <div class="cats" id="cats"></div>
+    <div class="section-title" id="section-title">Favoritos</div>
+    <div class="items-grid" id="items-grid"></div>
+  </div>
+
+  <!-- ORDER -->
+  <div class="order-panel">
+    <div class="order-top">
+      <h3>Orden</h3>
+      <div class="table-row" id="tables"></div>
+    </div>
+    <div class="notes-area">
+      <span class="notes-label">Notas / indicaciones especiales</span>
+      <textarea id="notes" placeholder="Ej: sin cebolla, extra salsa, alergia..."></textarea>
+    </div>
+    <div class="order-items" id="order-items">
+      <div class="order-empty">
+        <span class="big-emoji">☕</span>
+        <p style="font-size:13px;line-height:1.5">Selecciona platillos<br>del menú para comenzar</p>
+      </div>
+    </div>
+    <div class="order-footer">
+      <div class="totals">
+        <div class="t-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="t-row"><span>IVA (16%)</span><span id="iva">$0.00</span></div>
+        <div class="t-row grand"><span>Total</span><span id="total">$0.00</span></div>
+      </div>
+      <div class="action-row">
+        <button class="btn-clear" onclick="clearOrder()">Limpiar</button>
+        <button class="btn-ticket" onclick="openTicket()" title="Ver ticket">🧾</button>
+        <button class="btn-cobrar" id="cobrar-btn" onclick="cobrar()" disabled>Cobrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKET MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="ticket">
+    <div class="ticket-header">
+      <div class="ticket-logo">☕ Café de Olla</div>
+      <div class="ticket-sub">Valle de Guatimapé 402, Durango</div>
+      <div class="ticket-meta" id="ticket-meta"></div>
+    </div>
+    <div class="ticket-items" id="ticket-items"></div>
+    <div class="ticket-totals">
+      <div class="tt-row"><span>Subtotal</span><span id="t-subtotal"></span></div>
+      <div class="tt-row"><span>IVA (16%)</span><span id="t-iva"></span></div>
+      <div class="tt-row grand"><span>Total</span><span id="t-total"></span></div>
+    </div>
+    <div class="ticket-footer">
+      <strong>¡Gracias por su visita!</strong>
+      ⭐⭐⭐⭐⭐ Calificación 4.5 · 900+ reseñas
+    </div>
+    <div class="ticket-actions">
+      <button class="ta-btn" onclick="closeTicket()">Cerrar</button>
+      <button class="ta-btn primary" onclick="imprimirTicket()">🖨️ Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MENU = {
+  "Favoritos": [
+    { emoji:"🍳", name:"Desayuno Completo", price:115, rating:"92% (426)", promo:false, desc:"Huevos revueltos con jamón o chorizo, frijoles refritos con queso y chilaquiles rojos o verdes" },
+    { emoji:"🌮", name:"Chilaquiles", price:102, rating:"90% (472)", promo:false, desc:"Crujientes tortillitas fritas bañadas con tu salsa favorita, con frijoles" },
+    { emoji:"🫑", name:"Omelette Poblano", price:115, rating:"87% (16)", promo:true, desc:"Cremoso omelette de rajas poblanas, salsa verde cremosa y queso chihuahua" },
+    { emoji:"😎", name:"Combo Godin", price:89, rating:"100% (3)", promo:true, desc:"Chilaquiles con frijol, huevo, queso, crema, cilantro y café de olla" },
+    { emoji:"😴", name:"Chilaquiles dormidos", price:110, rating:"94% (201)", promo:false, desc:"Omelette de chilaquiles gratinados con queso chihuahua y frijoles refritos" },
+    { emoji:"🥚", name:"Omelette clásico", price:102, rating:"94% (156)", promo:false, desc:"Jamón y queso, papa a la mostaza y frijoles refritos con queso" },
+  ],
+  "Chilaquiles": [
+    { emoji:"🌮", name:"Chilaquiles", price:102, rating:"90% (472)", promo:false, desc:"Con tu salsa favorita y frijoles" },
+    { emoji:"😴", name:"Chilaquiles dormidos", price:110, rating:"94% (201)", promo:false, desc:"Omelette de chilaquiles gratinados con queso chihuahua y frijoles refritos" },
+    { emoji:"🫘", name:"Chilaquiles de frijol", price:110, rating:"91% (62)", promo:false, desc:"Salsa de frijoles y chipotle, chorizo y salsa roja dulce" },
+    { emoji:"☕", name:"Chilaquiles & Café", price:125, rating:"75% (74)", promo:true, desc:"Chilaquiles en tu salsa favorita y café de olla" },
+    { emoji:"🍳", name:"Combo chilaquiles", price:89, rating:"", promo:true, desc:"Chilaquiles, frijoles, queso crema, huevo a elegir y agua fresca 450ml" },
+    { emoji:"😎", name:"Combo Godin", price:89, rating:"100% (3)", promo:true, desc:"Chilaquiles, frijoles, huevo frito o revuelto y café de olla" },
+  ],
+  "Clásicos": [
+    { emoji:"🍳", name:"Desayuno Completo", price:115, rating:"92% (426)", promo:false, desc:"Huevos con jamón o chorizo, frijoles y chilaquiles" },
+    { emoji:"🥖", name:"Molletes", price:85, rating:"88% (89)", promo:false, desc:"Pan con frijoles y queso, jamón, chorizo, aderezo y salsa" },
+    { emoji:"🥖", name:"Molletes especiales", price:105, rating:"", promo:false, desc:"Pan con frijoles, queso y chicharrón" },
+    { emoji:"🥚", name:"Huevos albañil", price:92, rating:"", promo:false, desc:"Revueltos con salsa verde picosita y frijoles con queso fresco" },
+    { emoji:"🥚", name:"Omelette clásico", price:102, rating:"94% (156)", promo:false, desc:"Jamón y queso, papa a la mostaza y frijoles refritos" },
+  ],
+  "Especiales": [
+    { emoji:"🫑", name:"Omelette Poblano", price:115, rating:"87% (16)", promo:true, desc:"Rajas poblanas, salsa verde cremosa y queso chihuahua" },
+    { emoji:"🥾", name:"Huevos norteños", price:125, rating:"81% (49)", promo:true, desc:"Especialidad de la casa: tortillas con papas, chorizo y chilaquiles verdes" },
+    { emoji:"🍄", name:"Huevos poblanos", price:125, rating:"", promo:true, desc:"Tortillas con rajas, cebolla asada y champiñones, chilaquiles rojos y frijoles" },
+  ],
+  "Bebidas": [
+    { emoji:"☕", name:"Café de la casa", price:42, rating:"85% (60)", promo:false, desc:"360ml. Preparado con café de Veracruz" },
+    { emoji:"☕", name:"Café americano chico", price:28, rating:"71% (14)", promo:false, desc:"Vaso de 10 oz." },
+    { emoji:"🥛", name:"Licuados", price:43, rating:"94% (121)", promo:false, desc:"16 oz. Banana con chocolate o combinado" },
+    { emoji:"🍊", name:"Jugo natural", price:42, rating:"91% (123)", promo:false, desc:"360ml. Naranja o verde (espinaca, pepino, apio, piña)" },
+    { emoji:"🧋", name:"Frapuccino", price:79, rating:"100% (3)", promo:true, desc:"Capuccino a la licuadora con hielos y crema batida" },
+    { emoji:"🍪", name:"Frape Oreo", price:79, rating:"", promo:true, desc:"Frapé sabor oreo coronado con su galleta y crema batida" },
+    { emoji:"🍋", name:"Limonada Mineral", price:65, rating:"", promo:false, desc:"Limonada mineral endulzada" },
+    { emoji:"🥛", name:"Licuado de Rompope", price:45, rating:"100% (3)", promo:false, desc:"Preparado con leche entera 480ml" },
+  ],
+  "Postres": [
+    { emoji:"🥞", name:"Hot cakes", price:85, rating:"86% (248)", promo:false, desc:"Dos esponjosos hot cakes con mantequilla y maple" },
+    { emoji:"🌽", name:"Pan de elote", price:49, rating:"90% (71)", promo:false, desc:"Esponjoso pan de elote hecho en casa" },
+    { emoji:"🍞", name:"Pan con Mantequilla", price:35, rating:"87% (31)", promo:false, desc:"5 rebanadas con mantequilla y mermelada de fresa" },
+    { emoji:"🍹", name:"Coctel de frutas", price:65, rating:"84% (45)", promo:false, desc:"Piña, papaya, melón y plátano con yogurt y granola" },
+  ]
+};
+
+const TABLES = ["Mesa 1","Mesa 2","Mesa 3","Mesa 4","Mesa 5","Para llevar"];
+let order = {}, activeTable = "Mesa 1", activeCat = "Favoritos";
+let orderCount = 1;
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// Init
+function init() {
+  const catsEl = document.getElementById('cats');
+  Object.keys(MENU).forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (cat === activeCat ? ' active' : '');
+    b.textContent = cat;
+    b.onclick = () => setCategory(cat);
+    catsEl.appendChild(b);
+  });
+  const tablesEl = document.getElementById('tables');
+  TABLES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'table-btn' + (t === activeTable ? ' active' : '');
+    b.textContent = t;
+    b.onclick = () => {
+      activeTable = t;
+      document.querySelectorAll('.table-btn').forEach(x => x.classList.toggle('active', x.textContent === t));
+    };
+    tablesEl.appendChild(b);
+  });
+  renderItems();
+}
+
+function setCategory(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  document.getElementById('section-title').textContent = cat;
+  renderItems();
+}
+
+function renderItems() {
+  const grid = document.getElementById('items-grid');
+  grid.innerHTML = '';
+  (MENU[activeCat] || []).forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <span class="item-emoji">${item.emoji}</span>
+      <div class="item-name">${item.name}</div>
+      <div class="item-price">$${item.price}.00</div>
+      ${item.rating ? `<div class="item-rating">👍 ${item.rating}</div>` : ''}
+      ${item.promo ? `<span class="promo-tag">⭐ Promoción</span>` : ''}
+      <div class="item-desc">${item.desc}</div>
+    `;
+    card.onclick = () => addItem(item);
+    grid.appendChild(card);
+  });
+}
+
+function addItem(item) {
+  const key = item.name;
+  if (order[key]) order[key].qty++;
+  else order[key] = { ...item, qty: 1 };
+  renderOrder();
+  showToast(item.emoji + ' ' + item.name + ' agregado');
+}
+
+function changeQty(name, d) {
+  const safe = decodeURIComponent(name);
+  if (!order[safe]) return;
+  order[safe].qty += d;
+  if (order[safe].qty <= 0) delete order[safe];
+  renderOrder();
+}
+
+function renderOrder() {
+  const el = document.getElementById('order-items');
+  const keys = Object.keys(order);
+  if (!keys.length) {
+    el.innerHTML = '<div class="order-empty"><span class="big-emoji">☕</span><p style="font-size:13px;line-height:1.5">Selecciona platillos<br>del menú para comenzar</p></div>';
+    updateTotals(0);
+    document.getElementById('cobrar-btn').disabled = true;
+    return;
+  }
+  document.getElementById('cobrar-btn').disabled = false;
+  let html = '', sub = 0;
+  keys.forEach(k => {
+    const it = order[k], line = it.price * it.qty; sub += line;
+    const enc = encodeURIComponent(k);
+    html += `<div class="order-item">
+      <div class="oi-info">
+        <div class="oi-name">${it.emoji} ${it.name}</div>
+        <div class="oi-sub">${it.qty} × $${it.price}.00</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('${enc}',-1)">−</button>
+        <span class="qty-num">${it.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${enc}',1)">+</button>
+      </div>
+      <div class="oi-total">$${line}.00</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+  updateTotals(sub);
+}
+
+function updateTotals(sub) {
+  const iva = sub * 0.16, total = sub + iva;
+  document.getElementById('subtotal').textContent = '$' + sub.toFixed(2);
+  document.getElementById('iva').textContent = '$' + iva.toFixed(2);
+  document.getElementById('total').textContent = '$' + total.toFixed(2);
+}
+
+function clearOrder() {
+  order = {};
+  document.getElementById('notes').value = '';
+  renderOrder();
+}
+
+function cobrar() {
+  const keys = Object.keys(order);
+  if (!keys.length) return;
+  const sub = keys.reduce((s, k) => s + order[k].price * order[k].qty, 0);
+  const total = (sub * 1.16).toFixed(2);
+  showToast('✅ Cobrado $' + total + ' — ' + activeTable);
+  orderCount++;
+  clearOrder();
+}
+
+// Ticket modal
+function openTicket() {
+  const keys = Object.keys(order);
+  if (!keys.length) { showToast('Agrega platillos primero'); return; }
+  const now = new Date();
+  const fecha = now.toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'});
+  const hora = now.toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('ticket-meta').textContent = `${activeTable} · ${fecha} · ${hora} · Orden #${String(orderCount).padStart(3,'0')}`;
+
+  let itemsHtml = '', sub = 0;
+  keys.forEach(k => {
+    const it = order[k], line = it.price * it.qty; sub += line;
+    itemsHtml += `<div class="ti-row"><span>${it.qty}× ${it.name}</span><span>$${line}.00</span></div>`;
+  });
+  const notes = document.getElementById('notes').value.trim();
+  if (notes) itemsHtml += `<div style="font-size:11px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px dashed #ddd">📝 ${notes}</div>`;
+  document.getElementById('ticket-items').innerHTML = itemsHtml;
+
+  const iva = sub * 0.16, total = sub + iva;
+  document.getElementById('t-subtotal').textContent = '$' + sub.toFixed(2);
+  document.getElementById('t-iva').textContent = '$' + iva.toFixed(2);
+  document.getElementById('t-total').textContent = '$' + total.toFixed(2);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeTicket() { document.getElementById('modal').classList.remove('open'); }
+function imprimirTicket() { window.print(); }
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeTicket();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+init();
+</script>
+</body>
+</html>
